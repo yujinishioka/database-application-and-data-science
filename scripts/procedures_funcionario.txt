@@ -1,0 +1,31 @@
+SET SERVEROUTPUT ON;
+
+CREATE TABLE funcionario(
+    id NUMBER GENERATED ALWAYS AS IDENTITY,
+    nome VARCHAR2(100),
+    salario NUMBER(10,2) DEFAULT 0
+);
+
+INSERT INTO funcionario(nome, salario)
+VALUES(
+    'Alex',
+    4500
+);
+
+UPDATE funcionario
+SET salario = 3500
+WHERE id = 1;
+
+DECLARE
+    cont integer := 1;
+    tabela varchar2(50) := 'funcionario';
+    nome varchar2(50) := 'nome';
+    salario numeric := 0;
+BEGIN
+    SELECT salario INTO cont FROM funcionario;
+    IF cont > 4000 THEN
+        DBMS_OUTPUT.put_line( 'Não recebera aumento');
+    ELSE
+        DBMS_OUTPUT.put_line( 'Pode receber aumento de 25%');
+    END IF;
+END;
