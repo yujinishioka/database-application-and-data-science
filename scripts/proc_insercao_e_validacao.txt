@@ -1,0 +1,71 @@
+-- 1.
+
+CREATE OR REPLACE PROCEDURE PRC_INSERE_PRODUTO(
+    P_COD_PRODUTO PRODUTO.COD_PRODUTO%TYPE, 
+    P_NOM_PRODUTO PRODUTO.NOM_PRODUTO%TYPE, 
+    P_COD_BARRA PRODUTO.COD_BARRA%TYPE, 
+    P_STA_ATIVO PRODUTO.STA_ATIVO%TYPE, 
+    P_DAT_CADASTRO PRODUTO.DAT_CADASTRO%type, 
+    P_DAT_CANCELAMENTO PRODUTO.DAT_CANCELAMENTO%TYPE) IS
+BEGIN IF LENGTH(P_NOM_PRODUTO) <= 3 or 
+    REGEXP_LIKE(P_NOM_PRODUTO, '[0-9]') then 
+        RAISE_APPLICATION_ERROR(-20003, 'Nome do produto deve ter mais de 3 caracteres e não possuir números '); 
+    end if; 
+    INSERT INTO PRODUTO (
+        cod_produto, 
+        nom_produto, 
+        cod_barra, 
+        sta_ativo, 
+        dat_cadastro, 
+        dat_cancelamento)
+    VALUES (
+        P_cod_produto, 
+        P_nom_produto, 
+        P_cod_barra, 
+        P_sta_ativo, 
+        P_dat_cadastro, 
+        P_dat_cancelamento);
+COMMIT;
+END PRC_INSERE_PRODUTO;
+
+execute PRC_INSERE_PRODUTO(12347,'Garrafa de agua 5','12223555','S',sysdate,sysdate+10);
+
+-- 2.
+
+CREATE OR REPLACE PROCEDURE prc_insere_cliente(
+    p_cod_cliente clientes.cod_cliente%type, 
+    p_nom_cliente clientes.nom_cliente%type, 
+    p_des_razao_social clientes.des_razao_social%type, 
+    p_tip_pessoa clientes.tip_pessoa%type, 
+    p_num_cpf_cnpj clientes.num_cpf_cnpj%type, 
+    p_dat_cadastro clientes.dat_cadastro%type, 
+    p_dat_cancelamento clientes.dat_cancelamento%type, 
+    p_sta_ativo clientes.sta_ativo%type) IS 
+-- Validação do nome do cliente 
+BEGIN IF LENGTH(p_nom_cliente) <= 3 OR REGEXP_LIKE(p_nom_cliente, '[0-9]') THEN 
+    RAISE_APPLICATION_ERROR(-20001, 'Nome do cliente inválido.'); 
+END IF;
+-- Inserção do novo cliente 
+INSERT INTO clientes (
+    cod_cliente, 
+    nom_cliente, 
+    des_razao_social, 
+    tip_pessoa, 
+    num_cpf_cnpj, 
+    dat_cadastro, 
+    dat_cancelamento, 
+    sta_ativo) 
+VALUES (
+    p_cod_cliente, 
+    p_nom_cliente, 
+    p_des_razao_social, 
+    p_tip_pessoa, 
+    p_num_cpf_cnpj, 
+    p_dat_cadastro, 
+    p_dat_cancelamento, 
+    p_sta_ativo);
+-- Confirmação da transação 
+COMMIT;
+END prc_insere_cliente;
+
+Execute prc_insere_cliente(1233,'Maria dos Santos','descrição','F',78925632515,sysdate,sysdate+15,'s');
