@@ -53,3 +53,17 @@ EXECUTE PRC_INSERE_PEDIDO_RM92895(1001, 1001, 1001, 1001, 101, 28, 10, 10, sysda
 
 -- 2.
 
+CREATE OR REPLACE FUNCTION FUN_CONSULTA_PED_RM92895 (p_cod_pedido IN NUMBER) 
+RETURN NUMBER IS
+    v_cod_cliente NUMBER(10);
+BEGIN
+    SELECT cod_pedido INTO v_cod_cliente FROM pedido WHERE cod_cliente = v_cod_cliente;
+    RETURN v_cod_cliente;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN 'Pedido nao encontrado.';
+    WHEN OTHERS THEN
+        RETURN 'Erro na consulta.';
+END;
+
+-- 3.
