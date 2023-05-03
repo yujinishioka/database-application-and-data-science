@@ -1,0 +1,21 @@
+2.
+CREATE OR REPLACE TRIGGER novo_registro 
+    AFTER INSERT OR UPDATE OR DELETE ON endereco_cliente
+    FOR EACH ROW
+DECLARE
+    nome_usuario VARCHAR2(100);
+    operacao VARCHAR2(30);
+BEGIN
+    IF INSERTING THEN
+        operacao := 'INSERT';
+    ELSIF UPDATING THEN
+        operacao := 'UPDATE';
+    ELSIF DELETING THEN
+        operacao := 'DELETE';
+    END IF;
+    nome_usuario := SYS_CONTEXT('USERENV', 'SESSION_USER');
+    INSERT INTO tb_auditoria
+        (usuario, operacao, tabela, data)
+    VALUES
+        (nome_usuario, operacao, 'NOVO_REGISTRO', SYSDATE);
+END;
