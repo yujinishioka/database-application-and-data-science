@@ -1,4 +1,8 @@
-SELECT * FROM PEDIDO;
+-- Turma: 2TDST
+-- RM: 92895
+-- Nome: Vinicius Yuji Nishioka
+--
+-- PS: Tive problemas para tirar prints usando o banco da FIAP
 
 -- 1.
 
@@ -66,4 +70,74 @@ EXCEPTION
         RETURN 'Erro na consulta.';
 END;
 
+EXECUTE FUN_CONSULTA_PED_RM92895(1001);
+
 -- 3.
+
+CREATE OR REPLACE FUNCTION FUN_TOTAL_PEDIDO_RM92895(p_cod_cliente NUMBER)
+RETURN NUMBER
+IS
+  v_total_pedidos NUMBER := 0;
+BEGIN
+  SELECT SUM(valor_total) INTO v_total_pedidos FROM pedido WHERE cod_cliente = p_cod_cliente;
+  RETURN v_total_pedidos;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    RETURN 0;
+  WHEN OTHERS THEN
+    RETURN NULL;
+END;
+
+EXECUTE FUN_TOTAL_PEDIDO_RM92895(1001);
+
+-- 4.
+
+CREATE OR REPLACE FUNCTION FUN_INSERE_NF2_RM92895 (p_cod_pedido NUMBER, p_cod_cliente NUMBER)
+RETURN VARCHAR2
+IS
+  v_cod_cliente NUMBER(10);
+BEGIN
+  SELECT cod_cliente INTO v_cod_cliente FROM pedido WHERE cod_pedido = p_cod_pedido;
+  
+  IF v_cod_cliente IS NULL THEN
+    RAISE_APPLICATION_ERROR(-20001, 'Codigo do cliente nao encontrado.');
+  END IF;
+  
+  INSERT INTO pedido(cod_pedido, cod_cliente)
+  VALUES (p_cod_pedido, v_cod_cliente);
+
+  RETURN 'Pedido inserido com sucesso.';
+  
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    RETURN 'Pedido não encontrado.';
+  WHEN INCONSISTENCIA_DADOS THEN
+    RETURN 'Erro de consistência de dados.';
+  WHEN OTHERS THEN
+    RETURN 'Erro ao inserir pedido.';
+END;
+
+EXECUTE FUN_INSERE_NF2_RM92895(1001, 1001);
+
+-- 5.
+
+CREATE OR REPLACE FUNCTION FUN_VALIDA_PRODUTO_RM92895(p_cod_produto NUMBER)
+RETURN BOOLEAN
+IS
+  v_produto_encontrado NUMBER := 0;
+BEGIN
+  SELECT COUNT(*) INTO v_produto_encontrado FROM produto WHERE cod_produto = p_cod_produto;
+  
+  IF v_produto_encontrado > 0 THEN
+    RETURN TRUE;
+  ELSE
+    RETURN FALSE;
+  END IF;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    RETURN FALSE;
+  WHEN OTHERS THEN
+    RETURN FALSE;
+END;
+
+EXECUTE FUN_VALIDA_PRODUTO_RM92895(10);
