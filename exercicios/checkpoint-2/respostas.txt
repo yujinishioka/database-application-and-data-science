@@ -1,3 +1,5 @@
+SET SERVEROUTPUT ON;
+
 -- 1.
 CREATE OR REPLACE FUNCTION validar_cep(p_cep IN VARCHAR2) RETURN BOOLEAN
 IS
@@ -56,35 +58,33 @@ CREATE OR REPLACE PROCEDURE gerenciar_endereco_cliente (
     p_des_bairro IN VARCHAR2,
     p_sta_ativo IN CHAR,
     p_dat_cadastro IN DATE,
-    p_dat_cancelamento IN VARCHAR2
+    p_dat_cancelamento IN VARCHAR2,
     p_operacao IN VARCHAR2,
-    
-    p_cidade IN VARCHAR2,
-    p_estado IN VARCHAR2,
-    p_cep IN VARCHAR2,
     p_mensagem OUT VARCHAR2
 )
 IS
 BEGIN
   IF p_operacao = 'INSERT' THEN
-    IF validar_cep(p_cep) THEN
+    IF validar_cep(p_num_cep) THEN
       INSERT INTO endereco_cliente (id_cliente, logradouro, numero, complemento, bairro, cidade, estado, cep) 
-        VALUES (p_seq_endereco_cliente, p_des_endereco, p_num_endereco, p_des_complemento, p_des_bairro, p_cidade, p_estado, p_cep
+        VALUES (p_seq_endereco_cliente, p_cod_tipo_endereco, p_cod_cliente, p_cod_cidade, p_des_endereco, p_num_endereco, p_des_complemento, p_des_bairro, p_sta_ativo, p_dat_cadastro, p_dat_cancelamento, p_num_cep
       );
       p_mensagem := 'Endereço do cliente inserido com sucesso.';
     ELSE
       RAISE_APPLICATION_ERROR(-20001, 'O CEP informado é inválido.');
     END IF;
   ELSIF p_operacao = 'UPDATE' THEN
-    IF validar_cep(p_cep) THEN
+    IF validar_cep(p_num_cep) THEN
       UPDATE endereco_cliente SET
-        logradouro = p_des_endereco,
-        numero = p_num_endereco,
-        complemento = p_des_complemento,
-        bairro = p_des_bairro,
-        cidade = p_cidade,
-        estado = p_estado,
-        cep = p_cep
+        cod_tipo_endereco = p_cod_tipo_endereco,
+        cod_cliente = p_cod_cliente,
+        cod_cidade = p_cod_cidade,
+        des_endereco = p_des_endereco,
+        num_endereco = p_num_endereco,
+        des_complemento = p_des_complemento,
+        num_cep = p_num_cep,
+        des_bairro = p_des_bairro,
+        sta_ativo = p_sta_ativo
       WHERE id_cliente = p_seq_endereco_cliente;
       p_mensagem := 'Endereço do cliente atualizado com sucesso.';
     ELSE
@@ -111,9 +111,8 @@ BEGIN
     p_num_endereco := '123',
     p_des_complemento := '',
     p_des_bairro := 'Vila Progresso',
-    p_cidade := 'Guarulhos',
-    p_estado := 'SP',
-    p_cep := '12345-678',
+    p_cod_cidade := 'Guarulhos',
+    p_num_cep := '12345-678',
     p_mensagem := v_mensagem
     );
     DBMS_OUTPUT.PUT_LINE(v_mensagem);
@@ -123,57 +122,54 @@ END;
 CREATE OR REPLACE PROCEDURE mostrar_enderecos AS
   CURSOR cur_enderecos IS
     SELECT 
-      e.id_endereco, 
-      c.nome AS nome_cliente, 
-      e.logradouro, 
-      e.numero, 
-      e.complemento, 
-      e.bairro, 
-      ci.nome AS nome_cidade, 
-      es.nome AS nome_estado, 
-      p.nome AS nome_pais, 
-      e.cep
+      e.seq_endereco_cliente as id_endereco, 
+      c.nom_cliente as nome_cliente,
+      e.des_endereco as nome_endereco, 
+      e.num_endereco as numero, 
+      e.des_complemento as complemento, 
+      e.des_bairro as bairro,
+      ci.nom_cidade as cidade, 
+      p.nom_pais as pais, 
+      e.num_cep as cep
     FROM 
       endereco_cliente e
-      INNER JOIN cliente c ON c.id_cliente = e.id_cliente
-      INNER JOIN cidade ci ON ci.id_cidade = e.id_cidade
-      INNER JOIN estado es ON es.id_estado = ci.id_estado
-      INNER JOIN pais p ON p.id_pais = es.id_pais;
+      INNER JOIN cliente c ON c.cod_cliente = e.cod_cliente
+      INNER JOIN cidade ci ON ci.cod_cidade = e.cod_cidade
+      INNER JOIN estado es ON es.cod_estado = ci.cod_estado
+      INNER JOIN pais p ON p.cod_pais = es.cod_pais;
 BEGIN
   FOR endereco IN cur_enderecos LOOP
     DBMS_OUTPUT.PUT_LINE('ID: ' || endereco.id_endereco);
     DBMS_OUTPUT.PUT_LINE('Cliente: ' || endereco.nome_cliente);
-    DBMS_OUTPUT.PUT_LINE('Endereço: ' || endereco.logradouro || ', ' || endereco.numero);
+    DBMS_OUTPUT.PUT_LINE('Endereço: ' || endereco.nome_endereco || ', ' || endereco.numero);
     IF endereco.complemento IS NOT NULL THEN
       DBMS_OUTPUT.PUT_LINE('Complemento: ' || endereco.complemento);
     END IF;
     DBMS_OUTPUT.PUT_LINE('Bairro: ' || endereco.bairro);
-    DBMS_OUTPUT.PUT_LINE('Cidade: ' || endereco.nome_cidade);
-    DBMS_OUTPUT.PUT_LINE('Estado: ' || endereco.nome_estado);
-    DBMS_OUTPUT.PUT_LINE('País: ' || endereco.nome_pais);
+    DBMS_OUTPUT.PUT_LINE('Cidade: ' || endereco.cidade);
+    DBMS_OUTPUT.PUT_LINE('País: ' || endereco.pais);
     DBMS_OUTPUT.PUT_LINE('CEP: ' || endereco.cep);
     DBMS_OUTPUT.PUT_LINE(' ');
   END LOOP;
 END;
 
 BEGIN
-  mostrar_enderecos;
+    mostrar_enderecos;
 END;
 
-
 -- 5.
-CREATE OR REPLACE PROCEDURE listar_estados_por_pais(p_id_pais IN NUMBER) AS
+CREATE OR REPLACE PROCEDURE listar_estados_por_pais(p_cod_pais IN NUMBER) AS
 BEGIN
   FOR estado IN (
     SELECT 
-      id_estado,
-      nome
+      cod_estado,
+      nom_estado
     FROM 
       estado
     WHERE 
-      id_pais = p_id_pais
+      cod_pais = p_cod_pais
   ) LOOP
-    DBMS_OUTPUT.PUT_LINE('ID: ' || estado.id_estado || ' | Nome: ' || estado.nome);
+    DBMS_OUTPUT.PUT_LINE('ID: ' || estado.cod_estado || ' | Nome: ' || estado.nom_estado);
   END LOOP;
 END;
 
