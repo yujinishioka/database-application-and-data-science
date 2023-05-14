@@ -31,6 +31,6 @@ SID: orcl
 Live SQL: [![LiveSQL](https://img.shields.io/badge/SQL-yellow)](https://livesql.oracle.com/apex/f?p=590:1000)
 
 ---
-## Professor Marcel Thomé Filho
+## Professor Vergílio Valério dos Santos
 
-e-mail: profmarcel.filho@fiap.com.br
+e-mail: profvergilio.santos@fiap.com.br
